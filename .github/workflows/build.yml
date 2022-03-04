@@ -19,16 +19,6 @@ jobs:
           cache-dependency-path: requirements.txt
       - name: Install pip dependencies
         run: pip install -U -r requirements.txt
-      - name: Setup UPX
-        run: choco install upx --no-progress
-      - name: Build executable
-        run: |
-          tzutil /s "China Standard Time"
-          python generate-version.py > _version.py
-          pip install -U pyinstaller
-          pyinstaller --clean --console --onefile --icon=NONE stuhealth.py
-      - name: Upload result
-        uses: actions/upload-artifact@v2
-        with:
-          name: stuhealth
-          path: dist/stuhealth.exe
+      - name: Run stuhealth
+        working-directory: stuhealth
+        run: python stuhealth.py -u ${{ secrets.username }} -p ${{ secrets.password }} -ve ${{ secrets.validatorEndpoint }} -vt ${{ secrets.validatorToken }}
