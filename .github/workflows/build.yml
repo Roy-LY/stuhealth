@@ -19,6 +19,5 @@ jobs:
           cache-dependency-path: requirements.txt
       - name: Install pip dependencies
         run: pip install -U -r requirements.txt
-      - name: Run stuhealth
-        working-directory: stuhealth
+      - name: Run stuhealth      
         run: python stuhealth.py -u ${{ secrets.username }} -p ${{ secrets.password }} -ve ${{ secrets.validatorEndpoint }} -vt ${{ secrets.validatorToken }}
