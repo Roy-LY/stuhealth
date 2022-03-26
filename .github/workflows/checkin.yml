@@ -30,6 +30,5 @@ jobs:
           -p ${{ secrets.password }} 
           -ve ${{ secrets.validatorEndpoint }} 
           -vt ${{ secrets.validatorToken }}
-          
           -mp ${{ secrets.mailpwd }} 
           -ma ${{ secrets.mailaddress }}                     
