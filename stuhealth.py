@@ -26,12 +26,6 @@ def buildHeader() -> dict[str, str]:
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; Touch; rv:11.0) like Gecko',
     }
 
-# SMTP登录相关
-SMTP_HOST = 'smtp.qq.com'
-SMTP_USER = '951072733@qq.com'
-SMTP_PASSWORD = ''
-executeTime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-mailAddress = SMTP_USER
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -67,6 +61,20 @@ if __name__ == '__main__':
         help='Token of captcha validator API.'
     )
     parser.add_argument(
+        '-ma',
+        '--mailAddress',
+        required=True,
+        type=str,
+        help='Token of captcha validator API.'
+    )
+    parser.add_argument(
+        '-mp',
+        '--mailPassword',
+        required=True,
+        type=str,
+        help='Token of captcha validator API.'
+    )
+    parser.add_argument(
         '-l',
         '--log',
         required=False,
@@ -80,6 +88,12 @@ if __name__ == '__main__':
     validatorEndpoint: str = args.validator_endpoint
     validatorToken: str = args.validator_token
     log: str = args.log
+    # SMTP登录相关
+    SMTP_HOST = 'smtp.qq.com'
+    SMTP_USER = args.mailAddress
+    SMTP_PASSWORD = args.mailPassword
+    executeTime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    mailAddress = SMTP_USER
 
     if not username or not password:
         parser.print_help()
