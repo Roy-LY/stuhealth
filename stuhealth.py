@@ -221,7 +221,7 @@ if __name__ == '__main__':
                 raise Exception(submit['meta']['msg'])
             print(result)
             message = email.mime.text.MIMEText(
-                f'STUHEALTH打卡，以下是打卡工具的输出：<br><pre><code>{result}</code></pre><br>用户名：github action<br>执行时间：{executeTime}',
+                f'STUHEALTH打卡：<br><pre><code>{result}</code></pre><br>用户名：github action<br>执行时间：{executeTime}',
                 'html',
                 'utf-8',
             )
@@ -229,7 +229,7 @@ if __name__ == '__main__':
         except Exception as ex:
             result += str(ex)
             message = email.mime.text.MIMEText(
-                f'STUHEALTH打卡，以下是打卡工具的输出：<br><pre><code>{result}</code></pre><br>用户名：github action<br>执行时间：{executeTime}',
+                f'STUHEALTH打卡：<br><pre><code>{result}</code></pre><br>用户名：github action<br>执行时间：{executeTime}',
                 'html',
                 'utf-8',
             )
