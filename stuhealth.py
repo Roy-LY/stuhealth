@@ -5,6 +5,10 @@ import sys
 import random
 import requests
 import time
+import email.header
+import email.mime.text
+import email.utils
+import smtplib
 
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
@@ -21,6 +25,13 @@ def buildHeader() -> dict[str, str]:
         'X-Forwarded-For': '.'.join(str(random.randint(0, 255)) for x in range(4)),
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; Touch; rv:11.0) like Gecko',
     }
+
+# SMTP登录相关
+SMTP_HOST = 'smtp.qq.com'
+SMTP_USER = '951072733@qq.com'
+SMTP_PASSWORD = 'rightfhdaoskbgah'
+executeTime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+mailAddress = SMTP_USER
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -85,37 +96,32 @@ if __name__ == '__main__':
         result = 'Failed to check in: '
 
         try:
-            for i in range(3):
-                print(f'Fetching captcha validate token. (Attempt #{i + 1}/3)')
-                try:
-                    validate = s.post(
-                        validatorEndpoint,
-                        headers={
-                            'Authorization': f'Bearer {validatorToken}',
-                        },
-                    ).json()['validation_token']
-                    attemptException = None
-                    break
-                except Exception as ex:
-                    attemptException = ex
-            if attemptException:
-                raise Exception(f'Failed to get validate token: {type(attemptException).__name__} {attemptException}')
+            print('Fetching captcha validate token.')
+            try:
+                validate = s.post(
+                    validatorEndpoint,
+                    headers={
+                        'Authorization': f'Bearer {validatorToken}',
+                    },
+                ).json()['validation_token']
+            except Exception as ex:
+                raise Exception(f'Failed to get validate token: {type(ex).__name__} {ex}')
             print(f'Validate token: {validate[:8]}{"*" * min(8, max(0, len(validate) - 16))}{validate[-8:]}')
 
             print(f'Trying to login and get JNUID with username {username} and password.')
-            jnuid = s.post(
-                'https://stuhealth.jnu.edu.cn/api/user/login',
-                json.dumps({
-                    'username': username,
-                    'password': base64.b64encode(cipher.encrypt(pad(password.encode(), 16))).decode(),
-                    'validate': validate,
-                }),
-                headers=buildHeader(),
-            ).json()
-            if not jnuid['meta']['response']:
-                raise Exception(f'Failed to get JNUID: {jnuid["meta"]["msg"]}')
-            jnuid = jnuid['data']['jnuid']
-            print(f'JNUID: {jnuid[:8]}{"*" * min(8, max(0, len(jnuid) - 16))}{jnuid[-8:]}')
+            try:
+                jnuid = s.post(
+                    'https://stuhealth.jnu.edu.cn/api/user/login',
+                    json.dumps({
+                        'username': username,
+                        'password': base64.b64encode(cipher.encrypt(pad(password.encode(), 16))).decode(),
+                        'validate': validate,
+                    }),
+                    headers=buildHeader(),
+                ).json()['data']['jnuid']
+                print(f'JNUID: {jnuid[:8]}{"*" * min(8, max(0, len(jnuid) - 16))}{jnuid[-8:]}')
+            except:
+                raise Exception('Failed to get JNUID.')
 
             checkinInfo = s.post(
                 'https://stuhealth.jnu.edu.cn/api/user/stucheckin',
@@ -197,15 +203,36 @@ if __name__ == '__main__':
             elif '重复提交问卷' in submit['meta']['msg']:
                 result = 'Checkin already submitted.'
             else:
+                result = 'Fail to check in'
                 raise Exception(submit['meta']['msg'])
             print(result)
+            message = email.mime.text.MIMEText(
+                f'STUHEALTH打卡，以下是打卡工具的输出：<br><pre><code>{result}</code></pre><br>用户名：github action<br>执行时间：{executeTime}',
+                'html',
+                'utf-8',
+            )
+
         except Exception as ex:
             result += str(ex)
+            message = email.mime.text.MIMEText(
+                f'STUHEALTH打卡，以下是打卡工具的输出：<br><pre><code>{result}</code></pre><br>用户名：github action<br>执行时间：{executeTime}',
+                'html',
+                'utf-8',
+            )
             raise ex
         finally:
             if log:
                 with open(log, 'a+') as f:
                     f.write(f'[{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}] Username: {username} {result}\n')
+
+        message['From'] = email.utils.formataddr(('STUHEALTH打卡', SMTP_USER))
+        message['To'] = mailAddress
+        message['Subject'] = email.header.Header('[STUHEALTH] 健康打卡通知', 'utf-8').encode()
+
+        with smtplib.SMTP_SSL(SMTP_HOST) as smtp:
+            smtp.login(SMTP_USER, SMTP_PASSWORD)
+            smtp.sendmail(SMTP_USER, (mailAddress,), message.as_string())
+
     except Exception as ex:
         print(f'Failed to check in: {ex}')
         sys.exit(-1)
