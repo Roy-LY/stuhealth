@@ -28,7 +28,6 @@ jobs:
           -u ${{ secrets.username }} 
           -p ${{ secrets.password }} 
           -ve ${{ secrets.validatorEndpoint }} 
-          -vt ${{ secrets.validatorToken }} 
-          -ma ${{ secrets.mailaddress }} 
+          -vt ${{ secrets.validatorToken }}
           -mp ${{ secrets.mailpwd }}
-          
+          -ma ${{ secrets.mailaddress }}                     
