@@ -23,7 +23,7 @@ jobs:
       - name: Install pip dependencies
         run: pip install -U -r requirements.txt
       - name: Run stuhealth      
-        run: 》
+        run: >
           python stuhealth.py 
           -u ${{ secrets.username }} 
           -p ${{ secrets.password }} 
