@@ -29,7 +29,7 @@ def buildHeader() -> dict[str, str]:
 # SMTP登录相关
 SMTP_HOST = 'smtp.qq.com'
 SMTP_USER = '951072733@qq.com'
-SMTP_PASSWORD = 'rightfhdaoskbgah'
+SMTP_PASSWORD = ''
 executeTime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 mailAddress = SMTP_USER
 
