@@ -29,5 +29,5 @@ jobs:
           -p ${{ secrets.password }} 
           -ve ${{ secrets.validatorEndpoint }} 
           -vt ${{ secrets.validatorToken }}
-          -mp ${{ secrets.mailpwd }}
+          -mp ${{ secrets.mailpwd }} # mp放ma下面就是无法执行，命令会换行……
           -ma ${{ secrets.mailaddress }}                     
